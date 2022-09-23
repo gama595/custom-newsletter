@@ -58,15 +58,13 @@
 </ul>
 
 <h2>Execução</h2>
-<p>O ideal para esse projeto é executar atraves de tarefas agendadas, <bold>Como configurar Cron Jobs no windows: <a href="CRONJOBCONFIG.MD">Cron Job Config</a></bold></p>
+<p>O ideal para esse projeto é executar atraves de tarefas agendadas, <strong>como configurar Cron Jobs no windows: <a href="CRONJOBCONFIG.MD">Cron Job Config</a></strong></p>
 <p>Mas também pode ser executado via comando de console, lembre de abrir o console no diretorio do projeto</p>
 <ul>
 <li><p>API - <code>python api.py</code> A api é acessada pela <a href="http://localhost:5051">Localhost</a>, a porta e os endpoints podem ser encontrados no arquivo api.py</p></li><br/>
 <li><p>Crawler - <code>python -c "from main import*; Main.execute_crawler()"</code></p></li> <br/>
 <li><p>Email Sender - <code>python -c "from main import*; Main.send_message(1)</code> o numero passado como parametro é a frequencia selecionada pelos usuarios de quando querem receber email <a href="#api">ver mais</a></p></li><br/>
 </ul>
-
-<h2>Conclusão</h2>
 
 <h2>Proximos passos</h2>
 

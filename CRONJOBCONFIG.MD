@@ -27,7 +27,7 @@
 <p>8 - Antes de prosseguir precisamos saber algumas inforações, como o caminho que esta nosso python, para isso abra o prompt de comando ou cmd e digite <code>where python</code> e copie o caminho que aparecera</p>
 <img src="src/8.1.png"/>
 </br></br></br>
-<p>9 - Também precisamos do comando de execução do nosso programa por exemplo <code>python main.py</code> é o comando para usarmos a main, como o caminho do python ja sera informado, precisamos apenas informar o comando sem o prefixo do python, verifique no final desse arquivo a as linhas de comando utilizados</p>
+<p>9 - Também precisamos do comando de execução do nosso programa por exemplo <code>python main.py</code> é o comando para usarmos a main, como o caminho do python ja sera informado, precisamos apenas informar o comando sem o prefixo do python, verifique no final desse arquivo as linhas de comando utilizados</p>
 <img src="src/8.2.png"/>
 </br></br></br>
 <p>10 - E por ultimo o local que está o nosso arquivo main.py, basta usar o navegador de arquivos para achar</p>

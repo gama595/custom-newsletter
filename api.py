@@ -6,9 +6,11 @@ from datetime import datetime
 
 import log
 logger = log.setup_custom_logger()
+# Prevenir que a API não polua o nosso arquivo de log
 logger.getLogger('werkzeug').disabled = True
 
 try:
+    # Conectando com o banco
     con = sqlite3.connect("myDadaBase.db", check_same_thread=False)
     cur = con.cursor()
 except Exception as e:
@@ -78,6 +80,7 @@ app.logger.removeHandler(handler)
 def get_data():
 
     try:
+        # Recolhendo dados via Json
         json_data = request.json
         name = json_data['name']
         email = json_data['email']
@@ -85,6 +88,7 @@ def get_data():
     except Exception as e:
         logger.error(f'API - Erro ao ler dados da api: {e}')
 
+    # Validando dados
     if validade_name(name) == False:
         logger.warning(f'API - Tentativa de cadastro, nome invalido')
         status = False
@@ -92,6 +96,7 @@ def get_data():
         status = False
         logger.warning(f'API - Tentativa de cadastro, email invalido')
 
+    # Cadastrando e enviando resposta ao usuario
     if status == True:
         if register_user(name, email) == True:
             return {"Message: ": "User registration success"}
@@ -105,6 +110,7 @@ def get_data():
 def set_user_prefs():
 
     try:
+        # Recolhendo dados via Json
         json_data = request.json
 
         product = json_data['product']
@@ -114,6 +120,7 @@ def set_user_prefs():
     except Exception as e:
         logger.error(f'API - Erro ao ler dados da api: {e}')
 
+    # Validando dados
     if validade_email_exist(email) == False:
         status = False
         logger.warning(f'API - Tentativa de cadastro, email não existente')
@@ -121,6 +128,7 @@ def set_user_prefs():
         status = False
         logger.warning(f'API - Tentativa de cadastro, periodo invalido')
 
+    # Cadastrando e enviando resposta ao usuario
     if status == True:
         if register_request(product, period, email) == True:
             return {"Message: ": "Request registration success"}
@@ -129,7 +137,8 @@ def set_user_prefs():
     else:
         return {"Message: ": "Request registration failed"}
 
-    # Iniciando API
+
+# Iniciando API
 if __name__ == "__main__":
     try:
         logger.info(f'API executada : {datetime.now()}\n')

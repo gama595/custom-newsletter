@@ -1,5 +1,4 @@
 import sqlite3
-
 import time
 
 from selenium import webdriver
@@ -11,7 +10,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 import log
 logger = log.setup_custom_logger()
 
-
 class Crawler():
 
     def __init__(self):
@@ -21,6 +19,7 @@ class Crawler():
         self.prod_price = []
 
         try:
+            # Conectando com o banco
             self.con = sqlite3.connect(
                 "myDadaBase.db", check_same_thread=False)
             self.cur = self.con.cursor()
@@ -28,6 +27,7 @@ class Crawler():
             logger.error(f'Crawler - Erro ao conectar ao banco: {e}')
 
     def build_urls(self, stringParams):
+        # Criando urls para o crawler
         for string in stringParams:
             string = string.replace(" ", "+")
             self.start_urls.append(
@@ -35,17 +35,20 @@ class Crawler():
         return (self.start_urls)
 
     def get_url_params(self):
+        # Retornando os dados de produtos em requests
         res = self.cur.execute("SELECT product FROM requests")
         for resp in res.fetchall():
             self.stringParams.append(resp[0])
         return(self.stringParams)
 
     def crawler(self, urls):
+        # Inicializando o crawler
         options = Options()
         options.add_argument('--headless')
         driver = webdriver.Chrome(service=Service(
             ChromeDriverManager().install()), options=options)
 
+        # Navegando em nossas urls e coletando informações
         for url in urls:
             driver.get(url)
             time.sleep(2.5)
@@ -66,15 +69,18 @@ class Crawler():
         name_list = urlParams
         list_prods = []
 
+        # Criando uma lista com nossos produtos
         for i in range(0, len(self.prod_price)):
             list_prods.append(
                 (name_list[i], self.prod_name[i], self.prod_price[i]))
 
+        # Para cada produto, verificamos o id do produto e então...
         for item in list_prods:
             res = self.cur.execute(
                 "SELECT prodid FROM products WHERE marketname = ?", (item[1:2][0], ))
             currId = res.fetchone()
 
+            # Conectando com o banco inserimos ele no banco ou...
             if currId is None:
                 res = self.cur.execute(
                     "SELECT user FROM requests WHERE product = ?", (item[0:1][0], ))
@@ -84,6 +90,7 @@ class Crawler():
                 self.con.commit()
                 logger.info(
                     f'Produto {item[1:2][0]} inserido com sucesso no banco')
+            # Atualizamos os dados dele
             else:
                 self.cur.execute(
                     "UPDATE products SET price = ? WHERE prodid = ?", (item[2:3][0], currId[0:1][0], ))

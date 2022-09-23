@@ -2,21 +2,18 @@ from crawler import Crawler
 from sender import EmailSender
 from datetime import datetime
 import sqlite3
-import time
 
 import log
 logger = log.setup_custom_logger()
 
-
 class Main():
 
-    def say_hello():
-        print('hello')
-
     def load_database():
+        # Conectando com o banco
         con = sqlite3.connect("myDadaBase.db", check_same_thread=False)
         cur = con.cursor()
 
+        # Estabelecendo as tabelas
         cur.execute("""CREATE TABLE IF NOT EXISTS users(
         userid INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,

@@ -17,6 +17,7 @@ class EmailSender():
         self.port = 465  # SSL
         self.smtp_server = "smtp.gmail.com"  # gmail service
 
+        # Conectando com o banco
         try:
             self.con = sqlite3.connect(
                 "myDadaBase.db", check_same_thread=False)
@@ -24,6 +25,7 @@ class EmailSender():
         except Exception as e:
             logger.error(f'Crawler - Erro ao conectar ao banco: {e}')
 
+        # Lendo arquivo de usuario e senha
         try:
             secrets = []
             with open('senderemail.txt') as f:
@@ -34,11 +36,12 @@ class EmailSender():
         except Exception as e:
             logger.error(f'Sender - Erro ao ler arquivo senderemail.txt: {e}')
 
+    # Metodo para testar o email
     def say_hello(self):
         print('receiver: '+self.receiverEmail)
         print('message: '+self.message)
         print('subject: '+self.subject)
-        logger.info(
+        logger.debug(
             f'--- Menssagem teste enviada para {self.receiverEmail} ---')
 
     def set_receiver_email(self, receiverEmail):
@@ -67,6 +70,7 @@ class EmailSender():
 
     def sender(self, period):
 
+        # Recolhendo emails de usuarios no ciclo semanal/mensal
         try:
             res = self.cur.execute(
                 "SELECT user FROM requests WHERE period = ?", (period, ))
@@ -77,10 +81,12 @@ class EmailSender():
             logger.error(f'Sender - Erro ao encontrar requisições: {e}')
 
         try:
+            # criando uma lista de emails
             for email in emails:
                 email_list.append(email)
                 email_list = list(dict.fromkeys(email_list))
 
+            # Recuperando dados dos produtos relacionados ao usuario e então criando o corpo da mensagem que sera enviado por email
             for email in email_list:
                 msg = ''
                 res = self.cur.execute(
@@ -98,8 +104,11 @@ class EmailSender():
                 subj = f"Olá {userName[0:1][0][0]} aqui estão os dados de sua inscrição"
                 my_sender = EmailSender(
                     str(email[0:1][0]), str(msg), str(subj))
+
+                # Para nao enviar emails, troque essa linha comentada com a de baixo e o conteudo do email aparecera no console
                 # my_sender.say_hello()
                 my_sender.send_email()
+
                 time.sleep(2.5)
 
         except Exception as e:
