@@ -4,6 +4,7 @@ from email.message import EmailMessage
 import sqlite3
 
 import log
+import time
 logger = log.setup_custom_logger()
 
 
@@ -16,15 +17,22 @@ class EmailSender():
         self.port = 465  # SSL
         self.smtp_server = "smtp.gmail.com"  # gmail service
 
-        self.con = sqlite3.connect("myDadaBase.db", check_same_thread=False)
-        self.cur = self.con.cursor()
+        try:
+            self.con = sqlite3.connect(
+                "myDadaBase.db", check_same_thread=False)
+            self.cur = self.con.cursor()
+        except Exception as e:
+            logger.error(f'Crawler - Erro ao conectar ao banco: {e}')
 
-        secrets = []
-        with open('senderemail.txt') as f:
-            secrets = (f.readlines())
-            secrets = [s.replace('\n', '') for s in secrets]
-        self.sender_email = secrets[0].replace('email: ', '')
-        self.password = secrets[1].replace('password: ', '')
+        try:
+            secrets = []
+            with open('senderemail.txt') as f:
+                secrets = (f.readlines())
+                secrets = [s.replace('\n', '') for s in secrets]
+            self.sender_email = secrets[0].replace('email: ', '')
+            self.password = secrets[1].replace('password: ', '')
+        except Exception as e:
+            logger.error(f'Sender - Erro ao ler arquivo senderemail.txt: {e}')
 
     def say_hello(self):
         print('receiver: '+self.receiverEmail)
@@ -57,8 +65,42 @@ class EmailSender():
 
         logger.info(f'--- Menssagem enviada para {self.receiverEmail} ---')
 
-    # def sender(receiverEmail, message, subject):
-    #     sender = EmailSender(receiverEmail, message, subject)
-    #     sender.say_hello()
-    #     # sender.send_email()
-    #     logger.info(f'--- Menssagem enviada para {receiverEmail} ---')
+    def sender(self, period):
+
+        try:
+            res = self.cur.execute(
+                "SELECT user FROM requests WHERE period = ?", (period, ))
+            emails = res.fetchall()
+            email_list = []
+            msg = ''
+        except Exception as e:
+            logger.error(f'Sender - Erro ao encontrar requisições: {e}')
+
+        try:
+            for email in emails:
+                email_list.append(email)
+                email_list = list(dict.fromkeys(email_list))
+
+            for email in email_list:
+                msg = ''
+                res = self.cur.execute(
+                    "SELECT marketname price FROM products WHERE user = ?", (email[0:1][0], ))
+                products = res.fetchall()
+                res = self.cur.execute(
+                    "SELECT price FROM products WHERE user = ?", (email[0:1][0], ))
+                price = res.fetchall()
+
+                res = self.cur.execute(
+                    "SELECT name FROM users WHERE email = ?", (email[0:1][0], ))
+                userName = res.fetchall()
+                for i in range(0, len(products)):
+                    msg += f'Produto: {products[(i):(i+1)][0][0]}\nPreço: R$ {price[(i):(i+1)][0][0]}\n\n'
+                subj = f"Olá {userName[0:1][0][0]} aqui estão os dados de sua inscrição"
+                my_sender = EmailSender(
+                    str(email[0:1][0]), str(msg), str(subj))
+                # my_sender.say_hello()
+                my_sender.send_email()
+                time.sleep(2.5)
+
+        except Exception as e:
+            logger.error(f'Sender - Erro ao enviar email: {e}')

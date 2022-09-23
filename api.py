@@ -1,14 +1,30 @@
 from flask import Flask, request
 from email_validator import validate_email, EmailNotValidError
 import sqlite3
+from flask.logging import default_handler as handler
+from datetime import datetime
 
-con = sqlite3.connect("myDadaBase.db", check_same_thread=False)
-cur = con.cursor()
+import log
+logger = log.setup_custom_logger()
+logger.getLogger('werkzeug').disabled = True
+
+try:
+    con = sqlite3.connect("myDadaBase.db", check_same_thread=False)
+    cur = con.cursor()
+except Exception as e:
+    logger.error(f'API - Erro ao conectar ao banco: {e}')
 
 
 def register_user(name, email):
-    cur.execute("INSERT INTO users(name, email) VALUES (?, ?)", (name, email))
-    con.commit()
+    try:
+        cur.execute("INSERT INTO users(name, email) VALUES (?, ?)",
+                    (name, email))
+        con.commit()
+        logger.info(f'API - Usuario inserido ao banco: {name}')
+        return True
+    except Exception as e:
+        logger.error(f'API - Erro ao conectar ao banco: {e}')
+        return False
 
 
 def validade_name(name):
@@ -43,30 +59,44 @@ def validade_email_exist(email):
 
 
 def register_request(product, period, user):
-    cur.execute("INSERT INTO requests(product, period, user) VALUES (?, ?, ?)",
-                (product, period, user))
-    con.commit()
+    try:
+        cur.execute("INSERT INTO requests(product, period, user) VALUES (?, ?, ?)",
+                    (product, period, user))
+        con.commit()
+        logger.info(f'API - Request inserido ao banco: {product}')
+        return True
+    except Exception as e:
+        logger.error(f'API - Erro ao conectar ao banco: {e}')
+        return False
 
 
 app = Flask(__name__)
+app.logger.removeHandler(handler)
 
 
 @app.route("/register", methods=["POST"])
 def get_data():
 
-    json_data = request.json
-    name = json_data['name']
-    email = json_data['email']
-    status = True
+    try:
+        json_data = request.json
+        name = json_data['name']
+        email = json_data['email']
+        status = True
+    except Exception as e:
+        logger.error(f'API - Erro ao ler dados da api: {e}')
 
     if validade_name(name) == False:
+        logger.warning(f'API - Tentativa de cadastro, nome invalido')
         status = False
     if validade_email(email) == False:
         status = False
+        logger.warning(f'API - Tentativa de cadastro, email invalido')
 
     if status == True:
-        register_user(name, email)
-        return {"Message: ": "User registration success"}
+        if register_user(name, email) == True:
+            return {"Message: ": "User registration success"}
+        else:
+            return {"Message: ": "User registration failed"}
     else:
         return {"Message: ": "User registration failed"}
 
@@ -74,26 +104,35 @@ def get_data():
 @app.route("/register-request", methods=["POST"])
 def set_user_prefs():
 
-    json_data = request.json
+    try:
+        json_data = request.json
 
-    product = json_data['product']
-    period = json_data['period']
-    email = json_data['user-email']
-    status = True
+        product = json_data['product']
+        period = json_data['period']
+        email = json_data['user-email']
+        status = True
+    except Exception as e:
+        logger.error(f'API - Erro ao ler dados da api: {e}')
 
-    # if validade_product(product) == False: status = False
     if validade_email_exist(email) == False:
         status = False
+        logger.warning(f'API - Tentativa de cadastro, email não existente')
     if validade_period(period) == False:
         status = False
+        logger.warning(f'API - Tentativa de cadastro, periodo invalido')
 
     if status == True:
-        register_request(product, period, email)
-        return {"Message: ": "Request registration success"}
+        if register_request(product, period, email) == True:
+            return {"Message: ": "Request registration success"}
+        else:
+            return {"Message: ": "Request registration failed"}
     else:
         return {"Message: ": "Request registration failed"}
 
-
-# Iniciando API
+    # Iniciando API
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5051)
+    try:
+        logger.info(f'API executada : {datetime.now()}\n')
+        app.run(host='0.0.0.0', port=5051)
+    except Exception as e:
+        logger.error(f'API - Erro iniciar api: {e}')

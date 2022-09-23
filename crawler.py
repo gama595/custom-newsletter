@@ -20,8 +20,12 @@ class Crawler():
         self.prod_name = []
         self.prod_price = []
 
-        self.con = sqlite3.connect("myDadaBase.db", check_same_thread=False)
-        self.cur = self.con.cursor()
+        try:
+            self.con = sqlite3.connect(
+                "myDadaBase.db", check_same_thread=False)
+            self.cur = self.con.cursor()
+        except Exception as e:
+            logger.error(f'Crawler - Erro ao conectar ao banco: {e}')
 
     def build_urls(self, stringParams):
         for string in stringParams:
@@ -89,9 +93,22 @@ class Crawler():
 
     def execute_crawler():
         logger.info(f'--- Inicio da execução do crawler ---')
-        myCrawler = Crawler()
-        myUrlsParams = myCrawler.get_url_params()
-        myUrls = myCrawler.build_urls(myUrlsParams)
-        myCrawler.crawler(myUrls)
-        myCrawler.save_data(myUrlsParams)
+        try:
+            myCrawler = Crawler()
+        except Exception as e:
+            logger.error(f'Crawler - Erro ao instanciar o crawler: {e}')
+        try:
+            myUrlsParams = myCrawler.get_url_params()
+            myUrls = myCrawler.build_urls(myUrlsParams)
+        except Exception as e:
+            logger.error(
+                f'Crawler - Erro ao criar urls para o do crawler: {e}')
+        try:
+            myCrawler.crawler(myUrls)
+        except Exception as e:
+            logger.error(f'Crawler - Erro na execução do crawler: {e}')
+        try:
+            myCrawler.save_data(myUrlsParams)
+        except Exception as e:
+            logger.error(f'Crawler - Erro ao salvar dados do crawler: {e}')
         logger.info('--- Fim da execução do crawler ---')
