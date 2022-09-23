@@ -1,4 +1,4 @@
-from scrapper import Scrapper
+from crawler import Crawler
 from sender import EmailSender
 from datetime import datetime
 import sqlite3
@@ -48,7 +48,7 @@ class Main():
 
     def execute_crawler():
         logger.info(f'Crawler executado : {datetime.now()}\n')
-        Scrapper.execute_crawler()
+        Crawler.execute_crawler()
 
     def send_message(period):
         logger.info(f'Email sender executado : {datetime.now()}\n')

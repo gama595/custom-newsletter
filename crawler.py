@@ -12,7 +12,7 @@ import log
 logger = log.setup_custom_logger()
 
 
-class Scrapper():
+class Crawler():
 
     def __init__(self):
         self.stringParams = []
@@ -89,9 +89,9 @@ class Scrapper():
 
     def execute_crawler():
         logger.info(f'--- Inicio da execução do crawler ---')
-        myScrapper = Scrapper()
-        myUrlsParams = myScrapper.get_url_params()
-        myUrls = myScrapper.build_urls(myUrlsParams)
-        myScrapper.crawler(myUrls)
-        myScrapper.save_data(myUrlsParams)
+        myCrawler = Crawler()
+        myUrlsParams = myCrawler.get_url_params()
+        myUrls = myCrawler.build_urls(myUrlsParams)
+        myCrawler.crawler(myUrls)
+        myCrawler.save_data(myUrlsParams)
         logger.info('--- Fim da execução do crawler ---')
