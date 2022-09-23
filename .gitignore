@@ -3,6 +3,18 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Notebooks
+*.ipynb
+
+# Logging files
+*.log
+
+# Email secrets file
+senderemail.txt
+
+# Database
+*.db
+
 # C extensions
 *.so
 
